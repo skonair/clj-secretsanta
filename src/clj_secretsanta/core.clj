@@ -1,9 +1,5 @@
 (ns clj-secretsanta.core)
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
 
 (def people [
 	{:vorname "Luke" :nachname "Skywalker"}
@@ -17,21 +13,32 @@
 	(lazy-seq
 		(if (seq (rest c))
 			(apply concat (for [x c]
-				(map #(cons x %) (permutations (remove #{x} c)))))
-			[c])))
+				(map #(cons x %) (permutations (remove #{x} c))))) [c])))
 
 (defn to-tuples [s]
-	(let [c (vec (conj s (first s)))]
+	(let [fst (first s) c (conj (vec s) fst)]
 		(loop [[a & as] c akk []]
-			(if (empty? as)
+			(if (nil? as)
 				akk
 				(recur as (conj akk [a (first as)]))))))
 
 (defn valid? [c] 
-	(println "valid? c is " c)
-	(loop [[[t1 t2] as t & ts] c b true]
-		(println " t is " t)
-		(println "t1 is " t1 " t2 is " t2)
+	(loop [[t & ts] c b true]
 		(if (nil? t) 
 			b
-			(recur ts (and b (not (= (:nachname t1) (:nachname t2))))))))
+			(recur ts (and b (not (= (:nachname (first t)) (:nachname (second t)))))))))
+
+(defn pairs [c]
+	(filter valid? (map #(to-tuples %) (permutations c))))
+
+(defn secret-santa [c]
+	(first (pairs c)))
+
+
+(defn to-string [c]
+	(loop [[t & ts] c akk (str (:vorname (first t)) " " (:nachname (first t)) )]
+		(if (nil? t)
+			akk
+			(recur ts (str akk " -> " (:vorname (second t)) " " (:nachname (second t)))))
+		))
+
