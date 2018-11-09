@@ -6,6 +6,13 @@
 	{:vorname "Leia" :nachname "Skywalker"}
 	{:vorname "Toula" :nachname "Portokalos"}
 	{:vorname "Gus" :nachname "Portokalos"}
+	{:vorname "Bruce" :nachname "Wayne"}
+	{:vorname "Virgil" :nachname "Brigman"}
+	{:vorname "Lindsey" :nachname "Brigman"}
+	{:vorname "John" :nachname "Doe"}
+	{:vorname "Jane" :nachname "Doe"}
+	{:vorname "Bobba" :nachname "Fett"}
+	{:vorname "Anakin" :nachname "Skywalker"}	
 	])
 
 
@@ -15,24 +22,15 @@
 			(apply concat (for [x c]
 				(map #(cons x %) (permutations (remove #{x} c))))) [c])))
 
-(defn to-tuples [s]
-	(let [fst (first s) c (conj (vec s) fst)]
-		(loop [[a & as] c akk []]
-			(if (nil? as)
-				akk
-				(recur as (conj akk [a (first as)]))))))
-
 (defn valid? [c] 
 	(loop [[t & ts] c b true]
 		(if (nil? t) 
 			b
 			(recur ts (and b (not (= (:nachname (first t)) (:nachname (second t)))))))))
 
-(defn pairs [c]
-	(filter valid? (map #(to-tuples %) (permutations c))))
-
 (defn secret-santa [c]
-	(first (pairs c)))
+	(first (filter valid? (map #(let [fst (first %) cs (conj (vec %) fst)] (partition 2 1 cs)) (permutations c)))))
+
 
 
 (defn to-string [c]
@@ -42,3 +40,12 @@
 			(recur ts (str akk " -> " (:vorname (second t)) " " (:nachname (second t)))))
 		))
 
+(defn to-tuples [s]
+       (let [fst (first s) c (conj (vec s) fst)]
+               (loop [[a & as] c akk []]
+                       (if (nil? as)
+                               akk
+                               (recur as (conj akk [a (first as)]))))))
+
+(defn secret-santa-2 [c]
+	(first (filter valid? (map to-tuples (permutations c)))))
